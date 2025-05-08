@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Novter AI - Gelişmiş Yapay Zeka Platformu</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"  rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script> 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.11/purify.min.js"></script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="toastArea" class="toast hidden">
+  <div class="toast-spinner"></div>
+  <span class="toast-message">İşlem yapılıyor…</span>
+</div>
+
+<div class="app-container">
+  <header class="app-header">
+    <div class="brand-logo">
+      <img src="nort.png" alt="Novter AI Logosu" onerror="this.style.display='none'; console.warn('Logo (nort.png) yüklenemedi.')">
+      <h1>V1.0</h1> 
+    </div>
+     <button id="themeToggleBtn" class="icon-button theme-toggle" title="Temayı Değiştir">
+        <i data-feather="sun" class="sun-icon"></i>
+        <i data-feather="moon" class="moon-icon hidden"></i>
+     </button>
+  </header>
+
+  <section class="api-settings glass-ui">
+    <div class="field">
+      <label for="providerSelect">Sağlayıcı</label>
+      <select id="providerSelect">
+          <option value="gemini" selected>Google Gemini</option>
+          <option value="openrouter">OpenRouter</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="modelSelect">Model</label>
+      <div class="model-box">
+        <select id="modelSelect" disabled><option>Önce API Key Girin</option></select>
+        <button id="btnLoadModels" class="icon-button spin-on-hover" title="Modelleri Yenile (Sadece Gemini)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12a10 10 0 1 1 4 7.9m0 0v-4m0 4h4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field grow api-key-field" id="geminiApiKeyField">
+      <label for="geminiApiKey">Gemini API Key</label>
+      <input id="geminiApiKey" type="password" placeholder="Gemini API Anahtarınız">
+    </div>
+     <div class="field grow api-key-field hidden" id="openrouterApiKeyField">
+      <label for="openrouterApiKey">OpenRouter API Key</label>
+      <input id="openrouterApiKey" type="password" placeholder="OpenRouter API Anahtarınız (sk-or-...)">
+    </div>
+    <div class="field temperature-field">
+        <label for="temperatureSlider">Yaratıcılık (Temperature: <span id="temperatureValue">0.7</span>)</label>
+        <input type="range" id="temperatureSlider" min="0" max="1" step="0.1" value="0.7" class="slider">
+     </div>
+  </section>
+
+  <main id="codePane" class="content-pane glass-ui">
+    <div class="panel code-editor-panel">
+      <div class="panel-header">
+        <span>Kod Editörü</span>
+        <div class="panel-buttons">
+            <button id="btnExplainCode" class="small-button action-button" title="Seçili Kodu Açıkla" disabled>Açıkla</button>
+            <button id="btnImproveCode" class="small-button action-button" title="Seçili Kodu İyileştir" disabled>İyileştir</button>
+            <div class="button-divider"></div> <button id="btnClearCode" class="small-button clear-button" title="Editörü Temizle">
+                <i data-feather="trash-2" class="button-icon"></i><span>Temizle</span>
+            </button> 
+            <button id="btnCopyCode" class="small-button" title="Kodu Kopyala">Kopyala</button>
+            <button id="btnDownloadCode" class="small-button" title="Kodu İndir">İndir</button>
+        </div>
+      </div>
+      <div class="cm-editor-wrapper">
+        <textarea id="codeRaw"><!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Novter AI Örnek Sayfa</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      background-color: #f0f2f5; 
+      color: #333; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100vh; 
+      margin: 0; 
+      padding: 20px; 
+      text-align: center; 
+    }
+    .container { 
+      background-color: #ffffff; 
+      padding: 30px; 
+      border-radius: 12px; 
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+      max-width: 600px; 
+    }
+    h1 { 
+      color: #8a2be2; /* Mor bir başlık rengi */
+      margin-bottom: 20px; 
+      font-size: 2em; 
+    }
+    p { 
+      color: #555; 
+      line-height: 1.6; 
+      font-size: 1.1em; 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Yapay Zeka Harikası!</h1>
+    <p>Bu sayfa Novter AI tarafından anında oluşturuldu. Siz de projelerinizi hızlandırın!</p>
+  </div>
+</body>
+</html></textarea>
+      </div>
+    </div>
+    <div class="panel live-preview-panel">
+      <div class="panel-header"><span>Canlı Önizleme</span></div>
+      <iframe id="livePreviewFrame"></iframe>
+    </div>
+  </main>
+
+  <section id="textPane" class="content-pane hidden glass-ui text-editor-pane">
+     <div class="panel-header">
+        <span>Metin Editörü</span>
+         <div class="panel-buttons">
+             <button id="btnSummarizeText" class="small-button action-button" title="Metni Özetle" disabled>Özetle</button>
+            <button id="btnExpandText" class="small-button action-button" title="Metni Genişlet" disabled>Genişlet</button>
+             <div class="button-divider"></div> <button id="btnClearText" class="small-button clear-button" title="Metin Alanını Temizle">
+                <i data-feather="trash-2" class="button-icon"></i><span>Temizle</span>
+            </button>
+         </div>
+      </div>
+    <textarea id="markdownInput" class="styled-textarea" placeholder="Metninizi buraya yazın veya yapay zekadan oluşturmasını, özetlemesini, genişletmesini isteyin..."></textarea>
+    <div id="markdownPreviewOutput" class="markdown-preview styled-scrollbar">
+        </div>
+  </section>
+
+  <section id="promptBuilderPane" class="content-pane hidden glass-ui prompt-builder-pane">
+     <div class="panel-header">
+        <span>Metin Prompt Yardımcısı</span>
+         <button id="btnClearPromptHelper" class="small-button clear-button" title="Prompt Alanlarını Temizle">
+            <i data-feather="trash-2" class="button-icon"></i><span>Temizle</span>
+         </button>
+      </div>
+    <textarea id="promptHelperInput" class="styled-textarea" placeholder="Örn: 'Mobil uyumlu bir blog sitesi için ana sayfa tasarımı'"></textarea>
+    <button id="btnGeneratePrompt" class="button-primary full-width">Metin Prompt Oluştur</button>
+    <textarea id="promptHelperOutput" class="styled-textarea" readonly placeholder="Oluşturulan metin promptu burada görünecek..."></textarea>
+  </section>
+
+  <section id="imagePromptPane" class="content-pane hidden glass-ui image-prompt-builder-pane">
+      <div class="panel-header">
+        <span>Görsel Prompt Yardımcısı</span>
+         <button id="btnClearImagePrompt" class="small-button clear-button" title="Görsel Prompt Alanlarını Temizle">
+            <i data-feather="trash-2" class="button-icon"></i><span>Temizle</span>
+         </button>
+      </div>
+    <textarea id="imageSubjectInput" class="styled-textarea" placeholder="Örn: 'Gelecekteki bir İstanbul'un siberpunk bir manzarası, neon ışıklar, uçan arabalar'"></textarea>
+    <button id="btnGenerateImagePrompt" class="button-primary full-width">Görsel Prompt Oluştur</button>
+    <textarea id="imagePromptOutput" class="styled-textarea" readonly placeholder="Oluşturulan görsel promptu burada görünecek..."></textarea>
+  </section>
+  
+  <section id="historyPane" class="content-pane hidden glass-ui history-pane">
+       <div class="panel-header">
+        <span>İstek Geçmişi</span>
+         <button id="btnClearHistory" class="small-button clear-button" title="Geçmişi Temizle">
+            <i data-feather="trash-2" class="button-icon"></i><span>Tümünü Temizle</span>
+         </button>
+      </div>
+      <div id="historyList" class="history-list styled-scrollbar">
+          <p class="history-empty">Henüz bir istek geçmişi yok.</p>
+      </div>
+  </section>
+
+
+  <nav class="tabs-navigation glass-ui">
+    <button class="tab-button active" data-opens-pane="codePane">Kod</button>
+    <button class="tab-button" data-opens-pane="textPane">Metin</button>
+    <button class="tab-button" data-opens-pane="promptBuilderPane">Prompt Yrd.</button>
+    <button class="tab-button" data-opens-pane="imagePromptPane">Görsel P.</button>
+     <button class="tab-button" data-opens-pane="historyPane">Geçmiş</button> <div class="tab-indicator"></div>
+  </nav>
+
+  <footer class="user-input-footer glass-ui">
+    <input id="userInput" type="text" class="styled-input" placeholder="Kod/Metin oluştur, açıkla, iyileştir, özetle, genişlet..." disabled>
+    <button id="btnSendRequest" class="button-primary" disabled>
+      <span class="button-text">Oluştur</span>
+      <span class="button-loader hidden">
+        <svg class="spinner-icon" viewBox="0 0 50 50">
+          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+        </svg>
+      </span>
+    </button>
+  </footer>
+
+  <div class="page-credit">© Efe Ali Bozkurt</div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
