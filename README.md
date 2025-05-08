@@ -26,6 +26,3 @@ Bu uygulamanın mevcut versiyonu, API anahtarlarını doğrudan tarayıcıda sak
 
 Projeye katkıda bulunmaktan çekinmeyin! Lütfen değişikliklerinizi bir "Pull Request" olarak gönderin.
 
-## Lisans
-
-Bu proje [Seçtiğiniz Lisans Adı]'dır. (Örn: MIT Lisansı)
